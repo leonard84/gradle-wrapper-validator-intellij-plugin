@@ -85,6 +85,7 @@ tasks {
         }
         )
 
+        val changelog = project.changelog
         // Get the latest available change notes from the changelog file
         changeNotes.set(properties("pluginVersion").map { pluginVersion ->
             with(changelog) {
