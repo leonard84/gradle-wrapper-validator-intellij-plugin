@@ -1,4 +1,4 @@
-package com.github.leonard84.gradlewrappervalidatorintellijplugin
+package org.gradle.intellij.plugin.gradlewrappervalidator
 
 import com.intellij.ide.highlighter.XmlFileType
 import com.intellij.openapi.components.service
