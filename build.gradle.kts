@@ -65,6 +65,7 @@ kover.xmlReport {
 dependencies {
     implementation(libs.kotlinx.serialization)
     testImplementation(libs.assertj)
+    testImplementation(libs.wiremock)
 }
 
 tasks {
