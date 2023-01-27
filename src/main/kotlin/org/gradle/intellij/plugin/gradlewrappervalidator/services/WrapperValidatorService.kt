@@ -1,12 +1,12 @@
-package com.github.leonard84.gradlewrappervalidatorintellijplugin.services
+package org.gradle.intellij.plugin.gradlewrappervalidator.services
 
 import com.intellij.openapi.project.Project
-import com.github.leonard84.gradlewrappervalidatorintellijplugin.MyBundle
+import org.gradle.intellij.plugin.gradlewrappervalidator.WrapperValidatorBundle
 
-class MyProjectService(project: Project) {
+class WrapperValidatorService(project: Project) {
 
     init {
-        println(MyBundle.message("projectService", project.name))
+        println(WrapperValidatorBundle.message("projectService", project.name))
 
         System.getenv("CI")
             ?: TODO("Don't forget to remove all non-needed sample code files with their corresponding registration entries in `plugin.xml`.")

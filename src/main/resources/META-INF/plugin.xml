@@ -1,18 +1,18 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>com.github.leonard84.gradlewrappervalidatorintellijplugin</id>
-    <name>IntelliJ Platform Plugin gradle-wrapper-validator-intellij-plugin</name>
-    <vendor>leonard84</vendor>
+    <id>org.gradle.intellij.plugin.gradlewrappervalidator</id>
+    <name>Gradle Wrapper Validator</name>
+    <vendor>Gradle Inc.</vendor>
 
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.github.leonard84.gradlewrappervalidatorintellijplugin.services.MyApplicationService"/>
-        <projectService serviceImplementation="com.github.leonard84.gradlewrappervalidatorintellijplugin.services.MyProjectService"/>
+        <applicationService serviceImplementation="org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperValidatorApplicationService"/>
+        <projectService serviceImplementation="org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperValidatorService"/>
     </extensions>
 
     <applicationListeners>
-        <listener class="com.github.leonard84.gradlewrappervalidatorintellijplugin.listeners.MyProjectManagerListener"
+        <listener class="org.gradle.intellij.plugin.gradlewrappervalidator.listeners.WrapperValidatorManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </applicationListeners>
 </idea-plugin>

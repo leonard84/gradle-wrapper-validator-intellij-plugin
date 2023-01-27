@@ -1,13 +1,13 @@
-package com.github.leonard84.gradlewrappervalidatorintellijplugin
+package org.gradle.intellij.plugin.gradlewrappervalidator
 
 import com.intellij.DynamicBundle
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.PropertyKey
 
 @NonNls
-private const val BUNDLE = "messages.MyBundle"
+private const val BUNDLE = "messages.WrapperValidatorBundle"
 
-object MyBundle : DynamicBundle(BUNDLE) {
+object WrapperValidatorBundle : DynamicBundle(BUNDLE) {
 
     @Suppress("SpreadOperator")
     @JvmStatic
