@@ -6,9 +6,11 @@ fun environment(key: String) = providers.environmentVariable(key)
 
 plugins {
     // Java support
-    id("java")
+    java
     // Kotlin support
-    id("org.jetbrains.kotlin.jvm") version "1.8.0"
+    kotlin("jvm") version "1.8.0"
+    // Serialization support
+    kotlin("plugin.serialization") version "1.8.0"
     // Gradle IntelliJ Plugin
     id("org.jetbrains.intellij") version "1.12.0"
     // Gradle Changelog Plugin
@@ -59,6 +61,10 @@ qodana {
 // Configure Gradle Kover Plugin - read more: https://github.com/Kotlin/kotlinx-kover#configuration
 kover.xmlReport {
     onCheck.set(true)
+}
+dependencies {
+    implementation(libs.kotlinx.serialization)
+    testImplementation(libs.assertj)
 }
 
 tasks {

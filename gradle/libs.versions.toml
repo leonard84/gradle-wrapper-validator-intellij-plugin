@@ -1,0 +1,3 @@
+[libraries]
+kotlinx-serialization = { group = "org.jetbrains.kotlinx", name ="kotlinx-serialization-json", version = "1.5.0-RC"}
+assertj = { group = 'org.assertj', name = 'assertj-core', version = '3.24.2'}
