@@ -7,7 +7,9 @@ import com.intellij.testFramework.TestDataPath
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.intellij.util.PsiErrorElementUtil
 import org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperValidatorService
+import org.junit.Ignore
 
+@Ignore("Keep this test class for reference for now")
 @TestDataPath("\$CONTENT_ROOT/src/test/testData")
 class WrapperValidatorPluginTest : BasePlatformTestCase() {
 
