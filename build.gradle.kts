@@ -100,6 +100,11 @@ tasks {
         })
     }
 
+    // Check binary compatibility with the later versions of the IDE
+    runPluginVerifier {
+        ideVersions.set(listOf("2022.3.3", "2023.1"))
+    }
+
     // Configure UI tests plugin
     // Read more: https://github.com/JetBrains/intellij-ui-test-robot
     runIdeForUiTests {
