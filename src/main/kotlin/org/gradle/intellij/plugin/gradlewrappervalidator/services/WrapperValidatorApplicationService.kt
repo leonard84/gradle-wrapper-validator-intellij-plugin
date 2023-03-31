@@ -1,13 +1,21 @@
 package org.gradle.intellij.plugin.gradlewrappervalidator.services
 
+import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.diagnostic.logger
 import org.gradle.intellij.plugin.gradlewrappervalidator.services.client.ChecksumClient
 
-@Storage("WrapperValidator.xml")
-class WrapperValidatorApplicationService : PersistentStateComponent<WrapperValidatorApplicationState> {
-    private val LOG = logger<WrapperValidatorApplicationService>()
+@Storage("GradleWrapperValidator.xml")
+class WrapperValidatorApplicationService : PersistentStateComponent<WrapperValidatorApplicationState>, Disposable {
+
+    companion object {
+        private val LOG = logger<WrapperValidatorApplicationService>()
+
+        val instance: WrapperValidatorApplicationService
+            get() = ApplicationManager.getApplication().getService(WrapperValidatorApplicationService::class.java)
+    }
 
     private var state = WrapperValidatorApplicationState()
     private var checksumClient = ChecksumClient()
@@ -28,12 +36,23 @@ class WrapperValidatorApplicationService : PersistentStateComponent<WrapperValid
         LOG.debug("Updated wrapper hashes. (etag: ${state.etagOfLastUpdate}, number of wrapper hashes: ${state.wrapperHashes.size})")
     }
 
-    fun validateWrapper(wrapperHash: String): Boolean {
-        val valid = state.wrapperHashes.containsValue(wrapperHash)
-        return if (!valid) {
+    fun update() {
+        ApplicationManager.getApplication().executeOnPooledThread {
             updateNow()
-            state.wrapperHashes.containsValue(wrapperHash)
+        }
+    }
+
+    fun validateWrapper(wrapperHash: String): ValidationResult {
+        val valid = state.wrapperHashes[wrapperHash]
+        return if (valid == null) {
+            updateNow()
+            state.wrapperHashes[wrapperHash]?.let { ValidationResult.Valid(it) }
+                ?: ValidationResult.invalid(wrapperHash)
         } else
-            true
+            ValidationResult.valid(valid)
+    }
+
+    override fun dispose() {
+        checksumClient.close()
     }
 }

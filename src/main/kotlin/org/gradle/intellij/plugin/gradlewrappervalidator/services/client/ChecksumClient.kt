@@ -1,11 +1,5 @@
 package org.gradle.intellij.plugin.gradlewrappervalidator.services.client
 
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.future.await
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.net.URI
@@ -13,18 +7,23 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Instant
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executors
 import java.util.stream.Collectors.toList
 
-class ChecksumClient(private val serviceUrl: URI = URI(GRADLE_SERVICES_URL)) {
+class ChecksumClient(private val serviceUrl: URI = URI(GRADLE_SERVICES_URL)) : AutoCloseable {
 
     companion object {
         private const val GRADLE_SERVICES_URL = "https://services.gradle.org/versions/all"
     }
 
+    private val executorService = Executors.newFixedThreadPool(4)
+
     private val client = HttpClient.newBuilder()
         // We have to follow redirects because the service redirects the download urls to a CDN
         .followRedirects(HttpClient.Redirect.NORMAL)
         .build()
+
 
     fun getWrapperChecksums(
         etag: String? = null,
@@ -36,15 +35,20 @@ class ChecksumClient(private val serviceUrl: URI = URI(GRADLE_SERVICES_URL)) {
             .filter { !knownHashes.containsKey(it.version) }
             .collect(toList())
 
-        val newHashes = runBlocking {
-            newEntries.asFlow().take(1).map { entry ->
-                entry to loadContentAsync(entry.wrapperChecksumUrl!!)
-            }.toList()
-        }
+        val newHashes = newEntries
+            .map { entry ->
+                loadContentAsync(entry.wrapperChecksumUrl!!).thenApply { entry to it }
+            }
+
+        CompletableFuture.allOf(*newHashes.toTypedArray()).join()
 
         val resultHashes = knownHashes.toMutableMap()
-        newHashes.forEach { resultHashes[it.first.version] = it.second }
-        return WrapperChecksumsResult(resultHashes.toMap(), lookupResult.etag, lookupResult.lastUpdate)
+        newHashes.map { it.get() }.forEach { resultHashes[it.first.version] = it.second }
+        return WrapperChecksumsResult(
+            resultHashes.toMap(),
+            lookupResult.etag,
+            lookupResult.lastUpdate
+        )
     }
 
     fun getServiceEntries(etag: String? = null): ServiceEntriesResult {
@@ -65,12 +69,16 @@ class ChecksumClient(private val serviceUrl: URI = URI(GRADLE_SERVICES_URL)) {
         }
     }
 
-    private suspend fun loadContentAsync(url: String): String {
+    private fun loadContentAsync(url: String): CompletableFuture<String> {
         val request = HttpRequest.newBuilder()
             .uri(URI.create(url))
             .build()
         val response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-        return response.thenApply { it.body() }.await()
+        return response.thenApply { it.body() }
+    }
+
+    override fun close() {
+        executorService.shutdownNow()
     }
 }
 

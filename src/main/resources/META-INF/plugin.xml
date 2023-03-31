@@ -8,15 +8,22 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService
-            serviceImplementation="org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperValidatorApplicationService"/>
+            serviceImplementation="org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperValidatorApplicationService"
+            configurationSchemaKey="org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperValidatorApplicationService"
+        />
         <projectService
             serviceImplementation="org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperValidatorService"/>
-        <vfs.asyncListener
-            implementation="org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperFileChangeListener"/>
+        <!--        <vfs.asyncListener-->
+        <!--            implementation="org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperFileChangeListener"/>-->
+
+        <notificationGroup id="WrapperValidationNotificationGroup"
+                           displayType="BALLOON"
+                           key="wrapperValidationNotificationGroupName"/>
     </extensions>
 
     <applicationListeners>
         <listener class="org.gradle.intellij.plugin.gradlewrappervalidator.listeners.WrapperValidatorManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </applicationListeners>
+
 </idea-plugin>
