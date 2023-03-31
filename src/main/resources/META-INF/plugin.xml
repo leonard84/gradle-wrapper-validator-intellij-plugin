@@ -7,8 +7,12 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperValidatorApplicationService"/>
-        <projectService serviceImplementation="org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperValidatorService"/>
+        <applicationService
+            serviceImplementation="org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperValidatorApplicationService"/>
+        <projectService
+            serviceImplementation="org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperValidatorService"/>
+        <vfs.asyncListener
+            implementation="org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperFileChangeListener"/>
     </extensions>
 
     <applicationListeners>
