@@ -13,8 +13,6 @@
         />
         <projectService
             serviceImplementation="org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperValidatorService"/>
-        <!--        <vfs.asyncListener-->
-        <!--            implementation="org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperFileChangeListener"/>-->
 
         <notificationGroup id="WrapperValidationNotificationGroup"
                            displayType="BALLOON"

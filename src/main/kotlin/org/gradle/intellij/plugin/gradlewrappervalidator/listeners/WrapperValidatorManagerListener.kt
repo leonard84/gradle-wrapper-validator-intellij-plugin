@@ -5,15 +5,15 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManagerListener
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent
 import com.intellij.openapi.vfs.newvfs.events.VFileCreateEvent
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
-import com.intellij.psi.search.FilenameIndex
-import com.intellij.psi.search.GlobalSearchScope
 import org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperValidatorApplicationService
 import org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperValidatorService
+import java.nio.file.Path
 
 internal class WrapperValidatorManagerListener : ProjectManagerListener {
 
@@ -30,12 +30,13 @@ internal class WrapperValidatorManagerListener : ProjectManagerListener {
             VirtualFileManager.VFS_CHANGES,
             WrapperListener(wrapperValidatorService)
         )
-        GlobalSearchScope.projectScope(project).let { scope ->
-            FilenameIndex.getFilesByName(project, "gradle-wrapper.jar", scope).forEach {
-                LOG.info("Wrapper found: ${it.virtualFile.path}")
-                wrapperValidatorService.validateWrapper(it.virtualFile)
-            }
+
+        project.basePath?.let { projectBasePath ->
+            LocalFileSystem.getInstance()
+                .refreshAndFindFileByNioFile(Path.of(projectBasePath, "gradle/wrapper/gradle-wrapper.jar"))
+                ?.let { wrapperValidatorService.validateWrapper(it) }
         }
+
         WrapperValidatorApplicationService.instance.update()
     }
 }

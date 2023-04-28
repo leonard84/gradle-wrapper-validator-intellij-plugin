@@ -9,6 +9,7 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.concurrency.AppExecutorUtil
 import org.gradle.intellij.plugin.gradlewrappervalidator.WrapperValidatorBundle
@@ -36,22 +37,22 @@ class WrapperValidatorService(private val project: Project) : Disposable {
                 is ValidationResult.Valid -> {
                     Notification(
                         "WrapperValidationNotificationGroup",
-                        WrapperValidatorBundle.message("wrapperValidationSuccessTitle"),
-                        WrapperValidatorBundle.message("wrapperValidationSuccessMessage", it.version),
+                        WrapperValidatorBundle.message("wrapperValidationNotificationSuccessTitle"),
+                        WrapperValidatorBundle.message("wrapperValidationNotificationSuccessMessage", it.version),
                         NotificationType.INFORMATION
                     ).notify(project)
                 }
 
                 is ValidationResult.Invalid -> {
-//                    Messages.showErrorDialog(
-//                        project,
-//                        WrapperValidatorBundle.message("wrapperValidationFailedMessage", it.invalidHash),
-//                        WrapperValidatorBundle.message("wrapperValidationFailedTitle")
-//                    )
+                    Messages.showErrorDialog(
+                        project,
+                        WrapperValidatorBundle.message("wrapperValidationAlertMessage", it.invalidHash),
+                        WrapperValidatorBundle.message("wrapperValidationAlertFailedTitle")
+                    )
                     Notification(
                         "WrapperValidationNotificationGroup",
-                        WrapperValidatorBundle.message("wrapperValidationFailedTitle"),
-                        WrapperValidatorBundle.message("wrapperValidationFailedMessage", it.invalidHash),
+                        WrapperValidatorBundle.message("wrapperValidationNotificationFailedTitle"),
+                        WrapperValidatorBundle.message("wrapperValidationNotificationFailedMessage", it.invalidHash),
                         NotificationType.ERROR
                     ).notify(project)
                     LOG.warn("Wrapper validation failed for ${wrapperVFile.path}")

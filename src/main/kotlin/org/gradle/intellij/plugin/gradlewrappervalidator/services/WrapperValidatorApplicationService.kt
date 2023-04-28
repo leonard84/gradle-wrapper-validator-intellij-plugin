@@ -3,11 +3,16 @@ package org.gradle.intellij.plugin.gradlewrappervalidator.services
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.PersistentStateComponent
+import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.diagnostic.logger
 import org.gradle.intellij.plugin.gradlewrappervalidator.services.client.ChecksumClient
 
-@Storage("GradleWrapperValidator.xml")
+
+@State(
+    name = "GradleWrapperValidator",
+    storages = [Storage("GradleWrapperValidator.xml")]
+)
 class WrapperValidatorApplicationService : PersistentStateComponent<WrapperValidatorApplicationState>, Disposable {
 
     companion object {
