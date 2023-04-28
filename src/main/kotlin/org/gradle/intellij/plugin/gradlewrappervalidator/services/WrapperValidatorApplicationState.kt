@@ -5,6 +5,11 @@ import com.intellij.util.xmlb.annotations.OptionTag
 import java.time.Instant
 
 data class WrapperValidatorApplicationState(
+    // configuration
+    var activateValidationByDefault: Boolean = true,
+    var showAlertBoxOnValidationFailure: Boolean = true,
+    var renameWrapperOnValidationFailure: Boolean = false,
+    //--- internal
     var etagOfLastUpdate: String? = null,
     @OptionTag(converter = InstantConverter::class)
     var lastUpdate: Instant? = null,

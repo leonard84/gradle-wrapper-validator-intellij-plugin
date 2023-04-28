@@ -32,9 +32,12 @@ class WrapperValidatorApplicationService : PersistentStateComponent<WrapperValid
         this.state = state
     }
 
-    fun updateNow() {
-        LOG.debug("Updating wrapper hashes. (etag: ${state.etagOfLastUpdate}, number of wrapper hashes: ${state.wrapperHashes.size})")
-        val response = checksumClient.getWrapperChecksums(state.etagOfLastUpdate, state.wrapperHashes)
+    fun updateNow(force: Boolean = false) {
+        LOG.debug("Updating wrapper hashes (force: ${force}). (etag: ${state.etagOfLastUpdate}, number of wrapper hashes: ${state.wrapperHashes.size})")
+        val response = checksumClient.getWrapperChecksums(
+            if (force) null else state.etagOfLastUpdate,
+            state.wrapperHashes
+        )
         state.lastUpdate = response.lastUpdate
         state.etagOfLastUpdate = response.etag
         state.wrapperHashes.putAll(response.wrapperChecksums)

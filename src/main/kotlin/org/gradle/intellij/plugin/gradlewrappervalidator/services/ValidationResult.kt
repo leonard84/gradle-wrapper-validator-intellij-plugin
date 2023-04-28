@@ -1,5 +1,7 @@
 package org.gradle.intellij.plugin.gradlewrappervalidator.services
 
+import com.intellij.openapi.vfs.VirtualFile
+
 sealed class ValidationResult {
     /* Indicates that a validation could not be performed, e.g., file was already deleted. */
     object NotApplicable : ValidationResult()
@@ -11,4 +13,9 @@ sealed class ValidationResult {
 
         fun invalid(invalidHash: String): ValidationResult = Invalid(invalidHash)
     }
+
+    fun withVirtualFile(virtualFile: VirtualFile): VirtualFileWithValidationResult =
+        VirtualFileWithValidationResult(virtualFile, this)
 }
+
+data class VirtualFileWithValidationResult(val virtualFile: VirtualFile, val validationResult: ValidationResult)

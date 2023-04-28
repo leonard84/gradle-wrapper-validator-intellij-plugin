@@ -16,7 +16,14 @@
 
         <notificationGroup id="WrapperValidationNotificationGroup"
                            displayType="BALLOON"
+                           bundle="messages.WrapperValidatorBundle"
                            key="wrapperValidationNotificationGroupName"/>
+        <applicationConfigurable
+            parentId="tools"
+            instance="org.gradle.intellij.plugin.gradlewrappervalidator.settings.WrapperValidatorAppSettingsConfigurable"
+            id="org.gradle.intellij.plugin.gradlewrappervalidator.settings.WrapperValidatorAppSettingsConfigurable"
+            bundle="messages.WrapperValidatorBundle"
+            key="settingsDisplayName"/>
     </extensions>
 
     <applicationListeners>

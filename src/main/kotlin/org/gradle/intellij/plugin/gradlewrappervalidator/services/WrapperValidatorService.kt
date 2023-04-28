@@ -3,6 +3,7 @@ package org.gradle.intellij.plugin.gradlewrappervalidator.services
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.diagnostic.logger
@@ -21,45 +22,89 @@ class WrapperValidatorService(private val project: Project) : Disposable {
     }
 
     fun validateWrapper(wrapperVFile: VirtualFile) {
-        val result = ReadAction.nonBlocking(Callable {
+        ReadAction.nonBlocking(Callable {
             val fileIndex = ProjectFileIndex.getInstance(project)
-            if (!fileIndex.isInContent(wrapperVFile)) return@Callable ValidationResult.NotApplicable
+            if (!fileIndex.isInContent(wrapperVFile)) return@Callable ValidationResult.NotApplicable.withVirtualFile(
+                wrapperVFile
+            )
             ProgressManager.checkCanceled()
             val hash = Hasher.sha256(wrapperVFile.inputStream)
             return@Callable WrapperValidatorApplicationService.instance.validateWrapper(hash)
+                .withVirtualFile(wrapperVFile)
         })
-        result.withDocumentsCommitted(project).finishOnUiThread(ModalityState.NON_MODAL) {
-            when (it) {
-                is ValidationResult.Valid -> {
-                    Notification(
-                        "WrapperValidationNotificationGroup",
-                        WrapperValidatorBundle.message("wrapperValidationNotificationSuccessTitle"),
-                        WrapperValidatorBundle.message("wrapperValidationNotificationSuccessMessage", it.version),
-                        NotificationType.INFORMATION
-                    ).notify(project)
-                }
+            .withDocumentsCommitted(project)
+            .finishOnUiThread(ModalityState.NON_MODAL) { result ->
+                when (result.validationResult) {
+                    is ValidationResult.Valid -> {
+                        Notification(
+                            "WrapperValidationNotificationGroup",
+                            WrapperValidatorBundle.message("wrapperValidationNotificationSuccessTitle"),
+                            WrapperValidatorBundle.message(
+                                "wrapperValidationNotificationSuccessMessage",
+                                result.validationResult.version
+                            ),
+                            NotificationType.INFORMATION
+                        ).notify(project)
+                    }
 
-                is ValidationResult.Invalid -> {
-                    Messages.showErrorDialog(
-                        project,
-                        WrapperValidatorBundle.message("wrapperValidationAlertMessage", it.invalidHash),
-                        WrapperValidatorBundle.message("wrapperValidationAlertFailedTitle")
-                    )
-                    Notification(
-                        "WrapperValidationNotificationGroup",
-                        WrapperValidatorBundle.message("wrapperValidationNotificationFailedTitle"),
-                        WrapperValidatorBundle.message("wrapperValidationNotificationFailedMessage", it.invalidHash),
-                        NotificationType.ERROR
-                    ).notify(project)
-                    LOG.warn("Wrapper validation failed for ${wrapperVFile.path}")
-                }
+                    is ValidationResult.Invalid -> {
+                        if (WrapperValidatorApplicationService.instance.state.renameWrapperOnValidationFailure) {
+                            renameWrapperFile(result)
 
-                ValidationResult.NotApplicable -> {
-                    // Do nothing
+                            if (WrapperValidatorApplicationService.instance.state.showAlertBoxOnValidationFailure) {
+                                Messages.showErrorDialog(
+                                    project,
+                                    WrapperValidatorBundle.message(
+                                        "wrapperValidationAlertMessage",
+                                        result.validationResult.invalidHash
+                                    ),
+                                    WrapperValidatorBundle.message("wrapperValidationAlertFailedTitle")
+                                )
+                            }
+                        } else if (WrapperValidatorApplicationService.instance.state.showAlertBoxOnValidationFailure) {
+                            Messages.showOkCancelDialog(
+                                project,
+                                WrapperValidatorBundle.message(
+                                    "wrapperValidationAlertMessageWithRename",
+                                    result.validationResult.invalidHash
+                                ),
+                                WrapperValidatorBundle.message("wrapperValidationAlertFailedTitle"),
+                                WrapperValidatorBundle.message("wrapperValidationAlertRenameButton"),
+                                WrapperValidatorBundle.message("wrapperValidationAlertCancelButton"),
+                                Messages.getErrorIcon()
+                            ).let {
+                                when (it) {
+                                    Messages.OK -> renameWrapperFile(result)
+                                    else -> Unit
+                                }
+                            }
+                        }
+                        Notification(
+                            "WrapperValidationNotificationGroup",
+                            WrapperValidatorBundle.message("wrapperValidationNotificationFailedTitle"),
+                            WrapperValidatorBundle.message(
+                                "wrapperValidationNotificationFailedMessage",
+                                result.validationResult.invalidHash
+                            ),
+                            NotificationType.ERROR
+                        ).notify(project)
+                        LOG.warn("Wrapper validation failed for ${wrapperVFile.path}")
+                    }
+
+                    ValidationResult.NotApplicable -> {
+                        // Do nothing
+                    }
                 }
             }
-        }
             .submit(AppExecutorUtil.getAppExecutorService())
+    }
+
+    private fun renameWrapperFile(result: VirtualFileWithValidationResult) {
+        ApplicationManager.getApplication().runWriteAction {
+            result.virtualFile.let {
+                it.rename(this, it.nameWithoutExtension + "-jar.invalid")
+            }
+        }
     }
 
     override fun dispose() {
