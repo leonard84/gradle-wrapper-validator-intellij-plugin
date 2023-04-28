@@ -13,7 +13,7 @@ data class WrapperValidatorApplicationState(
     var etagOfLastUpdate: String? = null,
     @OptionTag(converter = InstantConverter::class)
     var lastUpdate: Instant? = null,
-    val wrapperHashes: MutableMap<String, String> = mutableMapOf()
+    var wrapperHashes: MutableMap<String, String> = mutableMapOf()
 )
 
 class InstantConverter : Converter<Instant>() {
