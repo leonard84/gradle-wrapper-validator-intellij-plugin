@@ -15,6 +15,8 @@ import org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperValidat
 import org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperValidatorService
 import java.nio.file.Path
 
+private const val GRADLE_WRAPPER_GRADLE_WRAPPER_JAR = "gradle/wrapper/gradle-wrapper.jar"
+
 internal class WrapperValidatorManagerListener : ProjectManagerListener {
 
     companion object {
@@ -22,7 +24,6 @@ internal class WrapperValidatorManagerListener : ProjectManagerListener {
     }
 
     override fun projectOpened(project: Project) {
-        LOG.info("Project opened: ${project.name}")
         val wrapperValidatorService = project.service<WrapperValidatorService>()
 
         val connection = project.messageBus.connect(wrapperValidatorService)
@@ -33,8 +34,11 @@ internal class WrapperValidatorManagerListener : ProjectManagerListener {
 
         project.basePath?.let { projectBasePath ->
             LocalFileSystem.getInstance()
-                .refreshAndFindFileByNioFile(Path.of(projectBasePath, "gradle/wrapper/gradle-wrapper.jar"))
-                ?.let { wrapperValidatorService.validateWrapper(it) }
+                .refreshAndFindFileByNioFile(Path.of(projectBasePath, GRADLE_WRAPPER_GRADLE_WRAPPER_JAR))
+                ?.let {
+                    LOG.debug("Found gradle-wrapper.jar in project base path.")
+                    wrapperValidatorService.validateWrapper(it)
+                }
         }
 
         WrapperValidatorApplicationService.instance.update()
@@ -44,10 +48,7 @@ internal class WrapperValidatorManagerListener : ProjectManagerListener {
 class WrapperListener(private val wrapperValidatorService: WrapperValidatorService) : BulkFileListener {
     override fun after(events: MutableList<out VFileEvent>) {
         events.stream()
-            .filter { it.path.endsWith("gradle/wrapper/gradle-wrapper.jar") }
-            .peek {
-                println("VFS event: ${it.path} (refresh: ${it.isFromRefresh}, save: ${it.isFromSave}, valid: ${it.isValid}, type: ${it.javaClass})")
-            }
+            .filter { it.path.endsWith(GRADLE_WRAPPER_GRADLE_WRAPPER_JAR) }
             .map { vFileEvent ->
                 when (vFileEvent) {
                     is VFileCreateEvent -> vFileEvent.file

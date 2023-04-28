@@ -20,10 +20,6 @@ class WrapperValidatorService(private val project: Project) : Disposable {
         private val LOG = logger<WrapperValidatorService>()
     }
 
-    init {
-        println(WrapperValidatorBundle.message("projectService", project.name))
-    }
-
     fun validateWrapper(wrapperVFile: VirtualFile) {
         val result = ReadAction.nonBlocking(Callable {
             val fileIndex = ProjectFileIndex.getInstance(project)
