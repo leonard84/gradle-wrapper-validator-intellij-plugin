@@ -1,6 +1,8 @@
 package org.gradle.intellij.plugin.gradlewrappervalidator.services.client
 
 import kotlinx.serialization.Serializable
+import org.gradle.intellij.plugin.gradlewrappervalidator.domain.Sha256
+import org.gradle.intellij.plugin.gradlewrappervalidator.domain.Version
 import java.time.Instant
 
 @Serializable
@@ -32,7 +34,7 @@ data class ServiceEntriesResult(
 ) : LookupResult
 
 data class WrapperChecksumsResult(
-    val wrapperChecksums: Map<String, String>,
+    val wrapperChecksums: Map<Version, Sha256>,
     override val etag: String?,
     override val lastUpdate: Instant
 ) : LookupResult

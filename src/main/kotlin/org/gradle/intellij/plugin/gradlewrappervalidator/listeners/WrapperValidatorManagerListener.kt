@@ -32,6 +32,8 @@ internal class WrapperValidatorManagerListener : ProjectManagerListener {
             WrapperListener(wrapperValidatorService)
         )
 
+        //WrapperValidationProjectService.getInstance(project).state.activateValidation
+
         project.basePath?.let { projectBasePath ->
             LocalFileSystem.getInstance()
                 .refreshAndFindFileByNioFile(Path.of(projectBasePath, GRADLE_WRAPPER_GRADLE_WRAPPER_JAR))

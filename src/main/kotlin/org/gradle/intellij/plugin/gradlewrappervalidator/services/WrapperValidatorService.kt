@@ -15,6 +15,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.concurrency.AppExecutorUtil
 import org.gradle.intellij.plugin.gradlewrappervalidator.WrapperValidatorBundle
 import java.util.concurrent.Callable
+import java.util.stream.Collectors
 
 class WrapperValidatorService(private val project: Project) : Disposable {
     companion object {
@@ -41,7 +42,8 @@ class WrapperValidatorService(private val project: Project) : Disposable {
                             WrapperValidatorBundle.message("wrapperValidationNotificationSuccessTitle"),
                             WrapperValidatorBundle.message(
                                 "wrapperValidationNotificationSuccessMessage",
-                                result.validationResult.version
+                                result.validationResult.versions.stream().map { it.stringValue }.sorted()
+                                    .collect(Collectors.joining(", "))
                             ),
                             NotificationType.INFORMATION
                         ).notify(project)
@@ -56,7 +58,7 @@ class WrapperValidatorService(private val project: Project) : Disposable {
                                     project,
                                     WrapperValidatorBundle.message(
                                         "wrapperValidationAlertMessage",
-                                        result.validationResult.invalidHash
+                                        result.validationResult.invalidHash.stringValue
                                     ),
                                     WrapperValidatorBundle.message("wrapperValidationAlertFailedTitle")
                                 )
@@ -66,7 +68,7 @@ class WrapperValidatorService(private val project: Project) : Disposable {
                                 project,
                                 WrapperValidatorBundle.message(
                                     "wrapperValidationAlertMessageWithRename",
-                                    result.validationResult.invalidHash
+                                    result.validationResult.invalidHash.stringValue
                                 ),
                                 WrapperValidatorBundle.message("wrapperValidationAlertFailedTitle"),
                                 WrapperValidatorBundle.message("wrapperValidationAlertRenameButton"),

@@ -1,11 +1,12 @@
 package org.gradle.intellij.plugin.gradlewrappervalidator.services
 
+import org.gradle.intellij.plugin.gradlewrappervalidator.domain.Sha256
 import java.io.InputStream
 import java.security.MessageDigest
 
 object Hasher {
     private val HEX_CHARS = "0123456789abcdef".toCharArray()
-    fun sha256(input: InputStream): String {
+    fun sha256(input: InputStream): Sha256 {
         val digest = MessageDigest.getInstance("SHA-256")
         val buffer = ByteArray(4096)
         var bytesRead: Int
@@ -21,6 +22,6 @@ object Hasher {
             result.append(HEX_CHARS[i and 0x0f])
         }
 
-        return result.toString()
+        return Sha256(result.toString())
     }
 }

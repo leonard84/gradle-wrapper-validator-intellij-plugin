@@ -2,6 +2,8 @@ package org.gradle.intellij.plugin.gradlewrappervalidator.services.client
 
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.gradle.intellij.plugin.gradlewrappervalidator.domain.Sha256
+import org.gradle.intellij.plugin.gradlewrappervalidator.domain.Version
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -27,12 +29,12 @@ class ChecksumClient(private val serviceUrl: URI = URI(GRADLE_SERVICES_URL)) : A
 
     fun getWrapperChecksums(
         etag: String? = null,
-        knownHashes: Map<String, String> = emptyMap()
+        knownHashes: Map<Version, Sha256> = emptyMap()
     ): WrapperChecksumsResult {
         val lookupResult = getServiceEntries(etag)
         val newEntries = lookupResult.serviceEntries.stream()
             .filter { it.wrapperChecksumUrl != null }
-            .filter { !knownHashes.containsKey(it.version) }
+            .filter { !knownHashes.containsKey(Version(it.version)) }
             .collect(toList())
 
         val newHashes = newEntries
@@ -43,7 +45,7 @@ class ChecksumClient(private val serviceUrl: URI = URI(GRADLE_SERVICES_URL)) : A
         CompletableFuture.allOf(*newHashes.toTypedArray()).join()
 
         val resultHashes = knownHashes.toMutableMap()
-        newHashes.map { it.get() }.forEach { resultHashes[it.first.version] = it.second }
+        newHashes.map { it.get() }.forEach { resultHashes[Version(it.first.version)] = Sha256(it.second) }
         return WrapperChecksumsResult(
             resultHashes.toMap(),
             lookupResult.etag,

@@ -45,7 +45,7 @@ class WrapperValidatorAppSettingsComponent() {
         val state = WrapperValidatorApplicationService.instance.state
         checksumInfo.text = WrapperValidatorBundle.message(
             "settingsChecksumInfo",
-            state.wrapperHashes.size
+            state.storedWrapperHashes.size
         )
         lastUpdateInfo.text = WrapperValidatorBundle.message(
             "settingsLastUpdateInfo",
