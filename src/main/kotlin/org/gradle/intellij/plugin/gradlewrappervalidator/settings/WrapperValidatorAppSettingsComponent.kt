@@ -1,5 +1,6 @@
 package org.gradle.intellij.plugin.gradlewrappervalidator.settings
 
+import com.intellij.ui.IdeBorderFactory
 import com.intellij.util.ui.FormBuilder
 import org.gradle.intellij.plugin.gradlewrappervalidator.WrapperValidatorBundle
 import org.gradle.intellij.plugin.gradlewrappervalidator.services.WrapperValidatorApplicationService
@@ -23,15 +24,36 @@ class WrapperValidatorAppSettingsComponent() {
     private val refreshNow = JButton(WrapperValidatorBundle.message("settingsRefreshNow"))
 
     init {
-        panel = FormBuilder.createFormBuilder()
+        val appSettingsPanel = FormBuilder.createFormBuilder()
             .addComponent(activateByDefault)
-            .addComponent(activateForCurrentProject)
             .addComponent(showAlertBoxOnValidationFailure)
             .addComponent(renameWrapperOnValidationFailure)
+            .panel.also {
+                it.border =
+                    IdeBorderFactory.createTitledBorder(WrapperValidatorBundle.message("settingsAppSectionBorderTitle"))
+            }
+
+        val projectSettingsPanel = FormBuilder.createFormBuilder()
+            .addComponent(activateForCurrentProject)
+            .panel.also {
+                it.border =
+                    IdeBorderFactory.createTitledBorder(WrapperValidatorBundle.message("settingsProjectSectionBorderTitle"))
+            }
+
+        val infoPanel = FormBuilder.createFormBuilder()
             .addComponent(checksumInfo)
             .addComponent(lastUpdateInfo)
             .addComponent(etagInfo)
             .addComponent(refreshNow)
+            .panel.also {
+                it.border =
+                    IdeBorderFactory.createTitledBorder(WrapperValidatorBundle.message("settingsInfoSectionBorderTitle"))
+            }
+
+        panel = FormBuilder.createFormBuilder()
+            .addComponent(appSettingsPanel)
+            .addComponent(projectSettingsPanel)
+            .addComponent(infoPanel)
             .panel
 
         updateInfo()
@@ -44,15 +66,15 @@ class WrapperValidatorAppSettingsComponent() {
     private fun updateInfo() {
         val state = WrapperValidatorApplicationService.instance.state
         checksumInfo.text = WrapperValidatorBundle.message(
-            "settingsChecksumInfo",
-            state.storedWrapperHashes.size
+            "settingsInfoChecksum",
+            state.wrapperHashToVersions.size
         )
         lastUpdateInfo.text = WrapperValidatorBundle.message(
-            "settingsLastUpdateInfo",
+            "settingsInfoLastUpdate",
             state.lastUpdate ?: "n/a"
         )
         etagInfo.text = WrapperValidatorBundle.message(
-            "settingsLastUpdateEtagInfo",
+            "settingsInfoLastUpdateEtag",
             state.etagOfLastUpdate ?: "n/a"
         )
     }
