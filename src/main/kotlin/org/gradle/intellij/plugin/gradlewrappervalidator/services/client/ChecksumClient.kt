@@ -44,8 +44,8 @@ class ChecksumClient(private val serviceUrl: URI = URI(GRADLE_SERVICES_URL)) : A
 
         CompletableFuture.allOf(*newHashes.toTypedArray()).join()
 
-        val resultHashes = knownHashes.toMutableMap()
-        newHashes.map { it.get() }.forEach { resultHashes[Version(it.first.version)] = Sha256(it.second) }
+        val resultHashes =
+            newHashes.map { it.get() }.associateTo(mutableMapOf()) { Version(it.first.version) to Sha256(it.second) }
         return WrapperChecksumsResult(
             resultHashes.toMap(),
             lookupResult.etag,

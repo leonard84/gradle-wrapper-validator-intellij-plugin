@@ -4,6 +4,8 @@ import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import org.assertj.core.api.Assertions.assertThat
+import org.gradle.intellij.plugin.gradlewrappervalidator.domain.Sha256
+import org.gradle.intellij.plugin.gradlewrappervalidator.domain.Version
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -73,6 +75,6 @@ class ChecksumClientTest {
         assertThat(response.etag).isEqualTo("1234")
         assertThat(response.wrapperChecksums)
             .hasSize(1)
-            .containsExactlyEntriesOf(mapOf("7.6" to "c5a643cf80162e665cc228f7b16f343fef868e47d3a4836f62e18b7e17ac018a"))
+            .containsExactlyEntriesOf(mapOf(Version("7.6") to Sha256("c5a643cf80162e665cc228f7b16f343fef868e47d3a4836f62e18b7e17ac018a")))
     }
 }
